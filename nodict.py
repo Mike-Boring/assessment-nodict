@@ -21,10 +21,8 @@ class Node:
         return f'{self.__class__.__name__}({self.key}, {self.value})'
 
     def __eq__(self, other):
-        """Allow for comparison of nodes."""
-        n1 = (self.key, self.value)
-        n2 = (other.key, other.value)
-        return n1 == n2
+        """Allow for comparison of nodes by key."""
+        return self.key == other.key
 
 
 class NoDict:
@@ -52,20 +50,41 @@ class NoDict:
                     self.buckets[bucket_index].append(new_node)
         else:
             self.buckets[bucket_index].append(new_node)
-
         return
 
     def get(self, key):
-        """Sets up get method"""
-        # Your code here
+        """Checks for specified key and returns value or raises KeyError"""
+        node_to_find = Node(key)
+        bucket_index = node_to_find.hash % self.size
+        for ind_node in self.buckets[bucket_index]:
+            if ind_node.key == node_to_find.key:
+                return ind_node.value
+            else:
+                continue
+        raise KeyError(f'{key} not found')
+
+    def __setitem__(self, key, value):
+        """Enables square-bracket assignment behavior"""
+        new_node = Node(key, value)
+        bucket_index = new_node.hash % self.size
+        if len(self.buckets[bucket_index]) > 0:
+            for i, ind_node in enumerate(self.buckets[bucket_index]):
+                if ind_node.key == new_node.key:
+                    self.buckets[bucket_index].remove(
+                        self.buckets[bucket_index][i])
+                    self.buckets[bucket_index].append(new_node)
+                else:
+                    self.buckets[bucket_index].append(new_node)
+        else:
+            self.buckets[bucket_index].append(new_node)
         return
 
     def __getitem__(self, key):
-        """Sets up get item method"""
-        # Your code here
-        return
-
-    def __setitem__(self, key, value):
-        """Sets up set item method"""
-        # Your code here
-        return
+        """Returns value from specified key"""
+        node_to_find = Node(key)
+        bucket_index = node_to_find.hash % self.size
+        for ind_node in self.buckets[bucket_index]:
+            if ind_node.key == node_to_find.key:
+                return ind_node.value
+            else:
+                raise KeyError(f'{key} not found')
